@@ -49,7 +49,7 @@ const App: React.FC = () => {
 
   const [darkMode, setDarkMode] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = async (retryCount = 3) => {
     try {
       const [humidityData, relayData, soilMoistureData, temperatureData] = await Promise.all([
         getHumidity(),
@@ -75,8 +75,12 @@ const App: React.FC = () => {
       });
       setLoading(false);
     } catch (err) {
-      setError("Failed to fetch data from the server.");
-      setLoading(false);
+      if (retryCount > 0) {
+        setTimeout(() => fetchData(retryCount - 1), 2000); // Retry after 2 seconds
+      } else {
+        setError("Failed to fetch data from the server.");
+        setLoading(false);
+      }
     }
   };
 
